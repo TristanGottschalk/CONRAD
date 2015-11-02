@@ -430,7 +430,7 @@ public class SVDandFT {
 		//5. Choose Shepp Logan Phantom
 		//6. Save the resulting volume. In the ImageJ window, File-Save As->Tiff...
 		
-		String filenameShepp = "/home/cip/medtech2011/os73isad/DMIP/Shepp-Logan Phantom.tif";
+		String filenameShepp = "/proj/i5dmip/os73isad/Reconstruction/CONRAD/src/edu/stanford/rsl/tutorial/dmip/Shepp-Logan Phantom.tif";
 		Grid3D sheppLoganVolume = ImageUtil.wrapImagePlus(IJ.openImage(filenameShepp));
 		//To work with a 2-D image, select slice 160
 		Grid2D sheppLoganImage = sheppLoganVolume.getSubGrid(160);
