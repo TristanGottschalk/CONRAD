@@ -8,6 +8,7 @@ import ij.IJ;
 import ij.ImageJ;
 import edu.stanford.rsl.conrad.data.numeric.InterpolationOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
+import edu.stanford.rsl.conrad.numerics.SimpleMatrix.InversionType;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.numerics.DecompositionSVD;
@@ -158,13 +159,12 @@ public class ImageUndistortion{
 		// can be used.
 		
 		// Number of lattice points
-		// TODO: define the number of lattice points
 		// change the value of nx, ny
 		int nx = 8;
 		int ny = 8;
 		
 		// step size
-		// TODO: calculate the stepsize of the lattice points 
+
 		float fx = imSize/ (nx-1);
 		float fy = imSize/ (ny-1);
 		
@@ -198,10 +198,9 @@ public class ImageUndistortion{
 		
 		// Compute the distorted points:
 		// XD2 = XU2 + (XU2 - XD2)
-		// TODO:
-		// TODO:
-		// TODO:
-		// TODO:
+		Xd2 = SimpleOperators.add(Xu2,SimpleOperators.subtract(Xu2, Xd2));
+		Yd2 = SimpleOperators.add(Yu2,SimpleOperators.subtract(Yu2, Yd2));
+		
 		
 		
 		// 2. Polynom of degree d
@@ -215,12 +214,13 @@ public class ImageUndistortion{
 		int degree = 5; //Polynomial's degree: 2,...,10
 		
 		// Number of Coefficients
-		// TODO:
 		int numCoeff = 0;
+		for(int i = 0; i <= degree+1; i++) {
+			numCoeff = numCoeff + i;
+		}
 		
 		// Number of Correspondences
-		// TODO:
-		int numCorresp = 0;
+		int numCorresp = nx*ny;
 		
 		// Print out of the used parameters
 		System.out.println("Polynom of degree: " + degree);
@@ -250,27 +250,31 @@ public class ImageUndistortion{
 		}
 		
 		// Compute matrix A
+		// loop over rows of A
 		for(int r = 0; r < numCorresp; r++)
 		{
 			int cc = 0;
+			// 2 loops over rows of A
 			for(int i = 0; i <= degree; i++)
 			{
 				for(int j = 0; j <= (degree-i); j++)
 				{
-					// TODO:
+					double currentX = Xd2.getElement(r, r);
+					double currentY = Yd2.getElement(r, r);
+					double val = Math.pow(currentY, j) *  Math.pow(currentX, i);
+					A.setElementValue(r, cc, val);
+					cc++;
 					
 				}
 			}
 		}
 		
 		// Compute the pseudo-inverse of A with the help of the SVD (class: DecompositionSVD)
-		// TODO
-		// TODO
-		
+		SimpleMatrix Ainv = A.inverse(InversionType.INVERT_SVD);
 		
 		// Compute the distortion coefficients
-		// TODO
-		// TODO
+		SimpleVector u = SimpleOperators.multiply(Ainv, Xd2_vec);
+		SimpleVector v = SimpleOperators.multiply(Ainv, Yd2_vec);
 		
 		
 		// 4. Compute the distorted grid points (xDist, yDist) which are used to sample the
