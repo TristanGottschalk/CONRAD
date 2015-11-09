@@ -8,6 +8,7 @@ import edu.stanford.rsl.conrad.data.numeric.Grid2DComplex;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.NumericGridOperator;
 import edu.stanford.rsl.conrad.filtering.MedianFilteringTool;
+import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
 import ij.IJ;
 import ij.ImageJ;
@@ -38,8 +39,10 @@ public class DefectPixelInterpolation {
 	public Grid2D interpolateSpectral(Grid2D image, Grid2D mask, int maxIter, boolean zeroPadding)
 	{
 		//padding
-		//TODO
-		//TODO
+		if(zeroPadding) {
+			int newWidth = (int) Math.pow(2, Math.ceil(Math.sqrt(image.getWidth())));
+			int newHeight = (int) Math.pow(2, Math.ceil(Math.sqrt(image.getHeight())));
+		}
 		
 		//fourier transform
 		Grid2DComplex G = new Grid2DComplex(1,1);//TODO
@@ -331,8 +334,8 @@ public class DefectPixelInterpolation {
 		
 				
 		//Load an image from file
-		String filename = "D:/02_lectures/DMIP/exercises/2014/3/testimg.bmp";
-		String filenameMask = "D:/02_lectures/DMIP/exercises/2014/3/mask.bmp";
+		String filename = "/proj/i5dmip/os73isad/Reconstruction/CONRAD/src/edu/stanford/rsl/tutorial/dmip/testimg.bmp";
+		String filenameMask = "/proj/i5dmip/os73isad/Reconstruction/CONRAD/src/edu/stanford/rsl/tutorial/dmip/mask.bmp";
 
 		Grid2D image = ImageUtil.wrapImagePlus(IJ.openImage(filename)).getSubGrid(0);
 		image.show("Ideal Input Image");
@@ -340,7 +343,15 @@ public class DefectPixelInterpolation {
 		Grid2D mask = ImageUtil.wrapImagePlus(IJ.openImage(filenameMask)).getSubGrid(0);
 		//Set some pixels as defect, elementwise multiply with defect pixel mask
 		Grid2D defectImage = new Grid2D(image);
-		//TODO
+		
+		defectImage.getGridOperator().multiplyBy(defectImage, mask);
+		
+/*		for(int i = 0; i < defectImage.getWidth(); i++) {
+			for(int j = 0; j < defectImage.getHeight(); j++) {
+				defectImage.multiplyAtIndex(i, j, mask.getAtIndex(i, j));
+			}
+		}*/
+
 		defectImage.show("Defect Image");
 		
 		
@@ -369,8 +380,7 @@ public class DefectPixelInterpolation {
 		boolean zeroPadding = true;
 		int maxIter = 4000;
 		
-		//TODO
-		Grid2D spectralFiltered = new Grid2D(1,1);//TODO
+		Grid2D spectralFiltered = dpi.interpolateSpectral(defectImage, mask, maxIter, zeroPadding);
 		spectralFiltered.show("Spectral Filtered Image");
 		
 		//show difference image |Spectral - Original|
