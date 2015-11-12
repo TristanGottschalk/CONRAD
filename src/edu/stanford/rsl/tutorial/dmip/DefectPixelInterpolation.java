@@ -38,17 +38,14 @@ public class DefectPixelInterpolation {
 	 */
 	public Grid2D interpolateSpectral(Grid2D image, Grid2D mask, int maxIter, boolean zeroPadding)
 	{
+		
 		//padding
-		if(zeroPadding) {
-			int newWidth = (int) Math.pow(2, Math.ceil(Math.sqrt(image.getWidth())));
-			int newHeight = (int) Math.pow(2, Math.ceil(Math.sqrt(image.getHeight())));
-		}
+		Grid2DComplex G = new Grid2DComplex(image, zeroPadding);
+		Grid2DComplex W = new Grid2DComplex(image, zeroPadding);
 		
 		//fourier transform
-		Grid2DComplex G = new Grid2DComplex(1,1);//TODO
-		Grid2DComplex W = new Grid2DComplex(1,1);//TODO
-		//TODO
-		//TODO
+		G.transformForward();
+		W.transformForward();
 		
 		int[] dim = G.getSize();
 		
@@ -78,7 +75,6 @@ public class DefectPixelInterpolation {
 			//which maximizes the energy reduction [Paragraph after Eq. (16) in the paper]
 			double maxDeltaE_G = Double.NEGATIVE_INFINITY;			
 			//create arraylist to store lines (in case multiple maxima are found)
-			//TODO
 			ArrayList<Integer[]> sj1 = null; //HINT
 			for(int x = 0; x < dim[0]; x++)
 			{
@@ -87,11 +83,11 @@ public class DefectPixelInterpolation {
 					float val = G.getAtIndex(x, y) ;
 					if( val > maxDeltaE_G)
 					{
-						//TODO
-						//TODO
-						//TODO
+						sj1 = new ArrayList<Integer[]>();
+						sj1.add(new Integer[]{x,y});
+						maxDeltaE_G = val;
 					}else if(val == maxDeltaE_G) {
-						//TODO
+						sj1.add(new Integer[]{x,y});
 					}
 				}
 			}
@@ -110,8 +106,8 @@ public class DefectPixelInterpolation {
 			
 			//Compute the corresponding linepair s2, t2:
 			//mirror the positions at halfDim
-			int s2 = 0;//TODO
-			int t2 = 0;//TODO
+			int s2 = (s1 > 0) ? dim[0] - (s1 % dim[0]) : s1;
+			int t2 = (t1 > 0) ? dim[1] - (t1 % dim[1]) : t1;
 			
 			//[Paragraph after Eq. (17) in the paper]
 			int twice_s1 = (2*s1) % dim[0];
@@ -346,12 +342,6 @@ public class DefectPixelInterpolation {
 		
 		defectImage.getGridOperator().multiplyBy(defectImage, mask);
 		
-/*		for(int i = 0; i < defectImage.getWidth(); i++) {
-			for(int j = 0; j < defectImage.getHeight(); j++) {
-				defectImage.multiplyAtIndex(i, j, mask.getAtIndex(i, j));
-			}
-		}*/
-
 		defectImage.show("Defect Image");
 		
 		
