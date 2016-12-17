@@ -25,7 +25,7 @@ public Grid2D projectRayDrivenFan(Grid2D grid, int numProjs, double detectorSpac
 		// angle index
 		double deltaS = detectorSpacing;
 		double betaIncrement = maxBeta / numProjs;
-		System.out.println(betaIncrement);
+		//System.out.println(betaIncrement);
 		
 		double d_id = d_sd - d_si; 
 		
@@ -76,7 +76,7 @@ public Grid2D projectRayDrivenFan(Grid2D grid, int numProjs, double detectorSpac
 			SimpleVector rayVec = new SimpleVector(sourceVec);
 			sVectorClone.multiplyBy((detectorLength / 2));
 			//System.out.println(sVectorClone.toString());
-			rayVec.subtract(sVectorClone);
+			rayVec.subtract(sVectorClone); // Hier sollten wir ganz links auf dem Detektor liegen!
 			//System.out.println(rayVec.toString());
 			//rayVec.multiplyElementBy(1, -1);
 			//System.out.println(rayVec.toString());
@@ -169,13 +169,13 @@ public Grid2D projectRayDrivenFan(Grid2D grid, int numProjs, double detectorSpac
 		double detectorSpacing = 1.0f;
 		
 		double d_si = 512;
-		double d_sd = 1024;
+		double d_sd = 1024; //512 --> Detecjtor liegt so in isozenter --> Fanogram sieht aus wie Sinogram!?
 		double halfFanAngle = Math.atan((detectorSize/2.0)/d_sd)*180;
 		//double halfFanAngle = 0;
-		System.out.println(halfFanAngle);
+		//System.out.println(halfFanAngle);
 		//double maxBeta = 180;
 		double maxBeta = 180 + 2 * halfFanAngle;
-		System.out.println(maxBeta);
+		//System.out.println(maxBeta);
 		
 				
 				
