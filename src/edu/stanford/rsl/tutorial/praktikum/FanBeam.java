@@ -25,7 +25,7 @@ public Grid2D projectRayDrivenFan(Grid2D grid, int numProjs, double detectorSpac
 		// angle index
 		double deltaS = detectorSpacing;
 		double betaIncrement = maxBeta / numProjs;
-		System.out.println(betaIncrement);
+		//System.out.println(betaIncrement);
 		
 		double d_id = d_sd - d_si; 
 		
@@ -76,7 +76,7 @@ public Grid2D projectRayDrivenFan(Grid2D grid, int numProjs, double detectorSpac
 			SimpleVector rayVec = new SimpleVector(sourceVec);
 			sVectorClone.multiplyBy((detectorLength / 2));
 			//System.out.println(sVectorClone.toString());
-			rayVec.subtract(sVectorClone);
+			rayVec.subtract(sVectorClone); // Hier sollten wir ganz links auf dem Detektor liegen!
 			//System.out.println(rayVec.toString());
 			//rayVec.multiplyElementBy(1, -1);
 			//System.out.println(rayVec.toString());
@@ -148,7 +148,43 @@ public Grid2D projectRayDrivenFan(Grid2D grid, int numProjs, double detectorSpac
 		}
 		return fanogram;
 	}
+
+public Grid2D rebinning(Grid2D fanogram, int detectorSize, double detectorSpacing, double halfFanAngle, double d_si, double d_sd) {
+		
+		int maxSIndex = detectorSize;
+		double maxS = (detectorSize-1) * detectorSpacing;
+		int maxThetaIndex = 180;
 	
+		double deltaS = detectorSpacing;
+		double deltaTheta = 1; //maxThetaIndex / projectionNumber;
+		
+		Grid2D sino = new Grid2D(new float[maxThetaIndex*maxSIndex], maxSIndex, maxThetaIndex);
+		sino.setSpacing(deltaS, deltaTheta);
+		
+		for(int e=0; e<maxThetaIndex; ++e){
+			// compute theta [rad] and angular functions.
+			double theta = (deltaTheta * e * Math.PI)/180;
+			double cosTheta = Math.cos(theta);
+			double sinTheta = Math.sin(theta);
+
+			for (int i = 0; i < maxSIndex; ++i) {
+				double s_par = deltaS * i - maxS / 2;
+				double gamma = Math.asin(s_par/d_si);
+				double beta = theta - gamma;
+				double s_fan = Math.tan(gamma) * d_sd;
+				
+				double [] indices = fanogram.physicalToIndex(s_fan,beta);
+				float curValue = InterpolationOperators.interpolateLinear(fanogram, indices[0], indices[1]);
+				
+				sino.setAtIndex(i, e, curValue);
+			}
+		}
+		
+		return sino;
+}
+	
+
+
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -161,26 +197,30 @@ public Grid2D projectRayDrivenFan(Grid2D grid, int numProjs, double detectorSpac
 		
 		FanBeam fan = new FanBeam();
 		
-		// number of projection images	
-		int projectionNumber = 180;	
+		
 		// detector size in pixel
 		int detectorSize = 512; 
 		// size of a detector Element [mm]
 		double detectorSpacing = 1.0f;
 		
-		double d_si = 512;
-		double d_sd = 1024;
+		double d_si = 720;
+		double d_sd = 1200;
 		double halfFanAngle = Math.atan((detectorSize/2.0)/d_sd)*180;
 		//double halfFanAngle = 0;
-		System.out.println(halfFanAngle);
+		//System.out.println(halfFanAngle);
 		//double maxBeta = 180;
 		double maxBeta = 180 + 2 * halfFanAngle;
-		System.out.println(maxBeta);
+		//System.out.println(maxBeta);
+		// number of projection images	
+		int projectionNumber = (int) maxBeta;	
 		
 				
 				
 		Grid2D fanogram = fan.projectRayDrivenFan(phantom, projectionNumber, detectorSpacing, detectorSize, maxBeta, d_si, d_sd); 
-		fanogram.show("The Unfiltered Sinogram");
+		fanogram.show("The Unfiltered Fanogram");
+		
+		Grid2D sinogram = fan.rebinning(fanogram, detectorSize, detectorSpacing, halfFanAngle, d_si, d_sd);
+		sinogram.show("The rebinning result");
 
 		// d_sd und d_si richtig beruecksichtigen
 		// drehrichtung detektor??
@@ -188,4 +228,3 @@ public Grid2D projectRayDrivenFan(Grid2D grid, int numProjs, double detectorSpac
 	}
 
 }
-
