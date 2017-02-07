@@ -284,7 +284,7 @@ public class ParallelBeam {
 	public static void main(String[] args){
 		new ImageJ();
 		double [] spacing = {1,1};
-		Phantom phantom = new Phantom(512,512,spacing);
+		Phantom phantom = new Phantom(256,256,spacing);
 		int sizeX = phantom.getSize()[0];
 		int sizeY = phantom.getSize()[1];
 		phantom.show("The phantom");
@@ -292,7 +292,7 @@ public class ParallelBeam {
 		ParallelBeam parallel = new ParallelBeam();
 		
 		// size of the phantom	
-		double angularRange = 180; 	
+		double angularRange = 360; 	
 		// number of projection images	
 		int projectionNumber = 360;	
 		// detector size in pixel
